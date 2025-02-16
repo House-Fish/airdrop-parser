@@ -1,4 +1,5 @@
 import json
+import argparse
 from datetime import datetime
 import pytz
 
@@ -14,6 +15,8 @@ def parse_airdrop_logs(input_file_path, output_file_path):
     # Get Singapore timezone
     sg_tz = pytz.timezone('Asia/Singapore')
     logs = []
+
+    print(f"Reading from {input_file_path}")
     
     # Read and parse the JSON file
     with open(input_file_path, 'r') as file:
@@ -26,7 +29,7 @@ def parse_airdrop_logs(input_file_path, output_file_path):
                 
                 # Create simplified log entry with only needed fields
                 simplified_entry = {
-                    'timestamp': sg_dt.strftime('%Y-%m-%d %H:%M:%S.%f %z'),  # Format: YYYY-MM-DD HH:MM:SS.mmmmmm +HHMM
+                    'timestamp': sg_dt.strftime('%Y-%m-%d %H:%M:%S.%f %z'),
                     'process': log_entry['process'],
                     'message': log_entry['message'],
                     'datetime': sg_dt  # Keep datetime object for sorting
@@ -39,6 +42,8 @@ def parse_airdrop_logs(input_file_path, output_file_path):
     
     # Sort logs by timestamp
     sorted_logs = sorted(logs, key=lambda x: x['datetime'])
+
+    print("Successfully parsed the file!")
     
     # Write sorted logs to output file in a simple log format
     with open(output_file_path, 'w') as outfile:
@@ -47,8 +52,13 @@ def parse_airdrop_logs(input_file_path, output_file_path):
             log_line = f"[{log['timestamp']}] {log['process']}: {log['message']}\n"
             outfile.write(log_line)
 
-# Example usage
+    print(f"Writing to {output_file_path}")
+    
+
 if __name__ == "__main__":
-    input_file = "airdrop.json"  # Replace with your input file path
-    output_file = "airdrop.log"  # Replace with desired output file path
-    parse_airdrop_logs(input_file, output_file)
+    parser = argparse.ArgumentParser(description="Parse and convert AirDrop logs to a sorted log file.")
+    parser.add_argument("input_file", help="Path to the input JSON file containing AirDrop logs")
+    parser.add_argument("output_file", help="Path where the sorted logs will be written")
+    
+    args = parser.parse_args()
+    parse_airdrop_logs(args.input_file, args.output_file)
